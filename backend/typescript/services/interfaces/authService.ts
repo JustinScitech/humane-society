@@ -1,4 +1,4 @@
-import { AuthDTO, Role, Token } from "../../types";
+import { AuthDTO, Role, Token} from "../../types";
 
 interface IAuthService {
   /**
@@ -82,6 +82,39 @@ interface IAuthService {
     accessToken: string,
     requestedEmail: string,
   ): Promise<boolean>;
+
+  /**
+   * Check if oobCode is valid.
+   * @param oob code from password reset URL
+   * @returns email as a string if the oobCode is valid
+   */
+  verifyPasswordResetCode(
+    oobCode: string
+  ): Promise<string>
+
+  /**
+   * Reset password.
+   * @param oobCode from apssword reset URL
+   * @param new password
+   * @returns true if password was reset successfully
+   */
+  confirmPasswordReset(
+    oobCode: string,
+    newPassword: string
+  ): Promise<boolean>
+
+  /**
+   * Full password reset flow (verify code + change password)
+   * For FIRST TIME password change.
+   * @param oobCode from apssword reset URL
+   * @param new password
+   * @returns true if successful
+   */
+  firstTimePasswordChange(
+    oobCode: string,
+    newPassword: string
+  ): Promise<boolean>
+
 }
 
 export default IAuthService;

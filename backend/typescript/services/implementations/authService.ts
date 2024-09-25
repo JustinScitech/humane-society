@@ -3,7 +3,7 @@ import * as firebaseAdmin from "firebase-admin";
 import IAuthService from "../interfaces/authService";
 import IEmailService from "../interfaces/emailService";
 import IUserService from "../interfaces/userService";
-import { AuthDTO, Role, RoleId, Token } from "../../types";
+import { AuthDTO, Role, RoleId, Token} from "../../types";
 import { getErrorMessage } from "../../utilities/errorUtils";
 import FirebaseRestClient from "../../utilities/firebaseRestClient";
 import logger from "../../utilities/logger";
@@ -228,6 +228,40 @@ class AuthService implements IAuthService {
     } catch (error) {
       return false;
     }
+  }
+
+  // verifies password reset code + returns email as a string
+  async verifyPasswordResetCode(
+    oobCode: string
+  ): Promise<string> { 
+    try {
+      return (await FirebaseRestClient.verifyPasswordResetCode(oobCode)).email;
+    }
+    catch(error) {
+      throw error // idk what to do here tbh!
+    }
+  }
+
+  async confirmPasswordReset( // might not wanna do boolean return ?????
+    oobCode: string,
+    newPassword: string
+  ): Promise<boolean> {
+    try {
+      await FirebaseRestClient.confirmPasswordReset(oobCode, newPassword);
+      return true
+    } catch(error) {
+      return false
+    }
+  }
+  // i think this setup is strange. like why do i throw an error for verify password and then do a boolean for confirm password.
+  // it's bc i want to return email as a string for the first one, but still it's inconsistent, maybe i should throw an error in both cases???
+  // i only need the email for filling in the 'email' field on the front end. so i could make two separate functions
+  async firstTimePasswordChange(
+    oobCode: string, 
+    newPassword: string
+  ): Promise<boolean> {
+      await this.verifyPasswordResetCode(oobCode)
+      return await this.confirmPasswordReset(oobCode, newPassword)
   }
 }
 
